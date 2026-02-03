@@ -7,36 +7,42 @@ import lombok.Setter;
 
 @Getter
 @Setter
-//@NoArgsConstructor
-@AllArgsConstructor
 @Builder(toBuilder = true)
 public class Shipment {
+
     private final String id;
+    private final Location origin;
+    private final Location destination;
     private ShipmentStatus status;
 
-    public Shipment(String id) {
+    public Shipment(String id, Location origin, Location destination) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Id is required");
+        }
         this.id = id;
-        this.status = ShipmentStatus.CREATED;
+        this.origin = origin;
+        this.destination = destination;
+        this.status = ShipmentStatus.IN_TRANSIT;
     }
 
-    public void dispatch() {
-        if (status != ShipmentStatus.CREATED) {
-            throw new IllegalStateException("Shipment can only be dispatched from CREATED");
-        }
-        this.status = ShipmentStatus.IN_TRANSIT;
+    public Shipment(String id, Location origin, Location destination, ShipmentStatus status) {
+        this.id = id;
+        this.origin = origin;
+        this.destination = destination;
+        this.status = status;
     }
 
     public void deliver() {
         if (status != ShipmentStatus.IN_TRANSIT) {
-            throw new IllegalStateException("Shipment can only be delivered from IN_TRANSIT");
+            throw new IllegalStateException("Only shipments in transit can be delivered");
         }
         this.status = ShipmentStatus.DELIVERED;
     }
 
-    public void markException() {
+    public void markIncident() {
         if (status == ShipmentStatus.DELIVERED) {
-            throw new IllegalStateException("Delivered shipment cannot change state");
+            throw new IllegalStateException("Delivered shipment cannot have incidents");
         }
-        this.status = ShipmentStatus.EXCEPTION;
+        this.status = ShipmentStatus.INCIDENT;
     }
 }
