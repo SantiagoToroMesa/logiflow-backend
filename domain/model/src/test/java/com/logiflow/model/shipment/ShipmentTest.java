@@ -7,25 +7,29 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ShipmentTest {
 
-    @Test
-    void should_start_in_created_state() {
-        Shipment shipment = new Shipment("S1");
-        assertEquals(ShipmentStatus.CREATED, shipment.getStatus());
-    }
+    private final Location origin =
+            new Location("New York", "123 Warehouse St");
+
+    private final Location destination =
+            new Location("San Francisco", "456 Market Ave");
 
     @Test
-    void should_dispatch_from_created() {
-        Shipment shipment = new Shipment("S1");
-        shipment.dispatch();
+    void should_start_in_transit_state() {
+        Shipment shipment = new Shipment("S1", origin, destination);
         assertEquals(ShipmentStatus.IN_TRANSIT, shipment.getStatus());
     }
 
     @Test
-    void delivered_shipment_cannot_change() {
-        Shipment shipment = new Shipment("S1");
-        shipment.dispatch();
+    void should_deliver_from_in_transit() {
+        Shipment shipment = new Shipment("S1", origin, destination);
         shipment.deliver();
-        assertThrows(IllegalStateException.class, shipment::markException);
+        assertEquals(ShipmentStatus.DELIVERED, shipment.getStatus());
     }
 
+    @Test
+    void delivered_shipment_cannot_have_incident() {
+        Shipment shipment = new Shipment("S1", origin, destination);
+        shipment.deliver();
+        assertThrows(IllegalStateException.class, shipment::markIncident);
+    }
 }
